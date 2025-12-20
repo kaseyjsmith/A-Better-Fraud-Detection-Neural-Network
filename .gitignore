@@ -1,0 +1,4 @@
+**/__pycache__/
+
+# Don't include raw dataset
+/data/creditcard.*
