@@ -111,7 +111,6 @@ class Trainer:
                 self.history.f1.append(f1)
                 self.history.roc_auc.append(roc_auc)
 
-            # TODO(human): Implement model checkpointing
             # Check if current ROC-AUC is better than best_roc_auc
             # If yes:
             #   - Update best_roc_auc and best_epoch

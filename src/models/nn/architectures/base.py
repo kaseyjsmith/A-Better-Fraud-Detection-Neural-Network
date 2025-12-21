@@ -1,14 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 from uuid import uuid4
 
 import lightning as L
-from torch.utils.data import TensorDataset, DataLoader
-
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from sklearn.metrics import (
     precision_score,
@@ -18,65 +15,30 @@ from sklearn.metrics import (
 )
 
 
-class FraudDetactionLightning(L.LightningModule):
-    def __init__(
-        self,
-        input=30,
-        h1=64,
-        h2=32,
-        h3=16,
-        h4=8,
-        out=1,
-        dropout_rate=0.2,
-        pos_weight=None,
-    ):
+class BaseFraudNN(L.LightningModule):
+    def __init__(self, pos_weight=None, lr=0.008):
         super().__init__()
-        self.input = nn.Linear(input, h1)
-        self.h1 = nn.Linear(h1, h2)
-        self.h2 = nn.Linear(h2, h3)
-        self.h3 = nn.Linear(h3, h4)
-        self.h4 = nn.Linear(h4, out)
-
-        # Implement dropout to not have the model not rely on a frequent path
-        self.dropout_rate = dropout_rate
-        self.dropout = nn.Dropout(self.dropout_rate)
-
         self.pos_weight = pos_weight
+        self.lr = 0.008
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
             self.loss_fn = BCEWithLogitsLoss(
-                pos_weight=torch.tensor([pos_weight])
+                pos_weight=torch.tensor([pos_weight], dtype=torch.float32)
             )
         else:
             self.loss_fn = BCEWithLogitsLoss()
 
         self.run_id = uuid4()
 
-        # Lists to collect outputs across batches for epoch-level metrics
         self.validation_step_outputs = []
         self.test_step_outputs = []
-
-    def forward(self, x):
-        x = F.relu(self.input(x))
-        x = self.dropout(x)
-
-        x = F.relu(self.h1(x))
-        x = self.dropout(x)
-
-        x = F.relu(self.h2(x))
-        x = self.dropout(x)
-
-        x = F.relu(self.h3(x))
-        x = self.dropout(x)
-
-        return self.h4(x)
 
     def configure_optimizers(self):
         # Learning rate scaled for batch size
         # Base lr=0.001 for batch_size=32, scale linearly: 512/32 = 16x → lr=0.016
         # Using conservative 0.008 (half of linear scaling) to avoid instability
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.008)
+        optimizer = Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, batch, batch_idx):
