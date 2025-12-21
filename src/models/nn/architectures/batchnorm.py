@@ -8,9 +8,9 @@ class BatchNormFraudNN(BaseFraudNN):
     Deep network with Batch Normalization for training stability.
 
     BatchNorm normalizes activations between layers, which:
-    - Prevents exploding/vanishing gradients
+    - Prevents exploding/vanishing gradients (the problem with simple deep networks)
     - Allows higher learning rates
-    - Widens the viable training window (can train for 50+ epochs)
+    - Widens the viable training window (can train for 50+ epochs, solves the problem with ResNet)
     - Acts as additional regularization
 
     Same depth as DeepFraudNN (11 layers) to enable direct comparison.

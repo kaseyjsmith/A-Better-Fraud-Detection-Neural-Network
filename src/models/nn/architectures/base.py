@@ -91,7 +91,7 @@ class BaseFraudNN(L.LightningModule):
         probs = torch.sigmoid(predictions)
 
         # Convert probabilities to binary predictions using 0.5 threshold
-        binary_preds = (probs > 0.5).float()
+        binary_preds = (probs > 0.9).float()
 
         # Log the test loss to Lightning's progress bar
         self.log("test_loss", loss, prog_bar=True)
