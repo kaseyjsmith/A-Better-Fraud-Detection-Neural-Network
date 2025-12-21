@@ -6,6 +6,8 @@ import torch.nn.functional as F
 class DeepFraudNN(BaseFraudNN):
     """
     DeepFraudNN keeps a fairly narrow layer strucutre, but is deeper than BaseFraudNN
+
+    The issue with deep neural networks is that they are prone to vanishing gradients.
     """
 
     def __init__(

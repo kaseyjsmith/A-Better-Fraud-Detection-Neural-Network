@@ -87,7 +87,6 @@ print("-" * 70)
 # Store results for each learning rate
 results = {}
 
-# TODO(human): Implement the learning rate sweep loop
 model_runs = []
 trainer_runs = []
 for idx, lr in enumerate(LEARNING_RATES):

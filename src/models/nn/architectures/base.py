@@ -19,7 +19,7 @@ class BaseFraudNN(L.LightningModule):
     def __init__(self, pos_weight=None, lr=0.008):
         super().__init__()
         self.pos_weight = pos_weight
-        self.lr = 0.008
+        self.lr = lr
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
