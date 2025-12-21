@@ -1,7 +1,8 @@
 from .architectures.baseline import BaselineFraudNN
+from .architectures.wide import WideFraudNN
 import argparse
 
-ARCHITECTURES = {"baseline": BaselineFraudNN, "wide": None}
+ARCHITECTURES = {"baseline": BaselineFraudNN, "wide": WideFraudNN}
 
 
 def create_architecture(arch, **kwargs):

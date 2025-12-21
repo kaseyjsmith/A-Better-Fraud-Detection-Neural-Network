@@ -16,9 +16,10 @@ from sklearn.metrics import (
 
 
 class BaseFraudNN(L.LightningModule):
-    def __init__(self, pos_weight=None):
+    def __init__(self, pos_weight=None, lr=0.008):
         super().__init__()
         self.pos_weight = pos_weight
+        self.lr = 0.008
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
@@ -37,7 +38,7 @@ class BaseFraudNN(L.LightningModule):
         # Learning rate scaled for batch size
         # Base lr=0.001 for batch_size=32, scale linearly: 512/32 = 16x → lr=0.016
         # Using conservative 0.008 (half of linear scaling) to avoid instability
-        optimizer = Adam(self.parameters(), lr=0.008)
+        optimizer = Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, batch, batch_idx):
