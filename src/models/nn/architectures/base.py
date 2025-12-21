@@ -23,7 +23,7 @@ class BaseFraudNN(L.LightningModule):
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
             self.loss_fn = BCEWithLogitsLoss(
-                pos_weight=torch.tensor([pos_weight])
+                pos_weight=torch.tensor([pos_weight], dtype=torch.float32)
             )
         else:
             self.loss_fn = BCEWithLogitsLoss()

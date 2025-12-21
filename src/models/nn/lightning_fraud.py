@@ -10,7 +10,12 @@ from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import (
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+)
 
 
 class FraudDetactionLightning(L.LightningModule):
@@ -75,7 +80,6 @@ class FraudDetactionLightning(L.LightningModule):
         return optimizer
 
     def training_step(self, batch, batch_idx):
-        # TODO(human): Implement the training step
         # Unpack batch, run forward pass, compute loss, return loss
         batch_x, batch_y = batch
         predictions = self.forward(batch_x)
@@ -102,15 +106,11 @@ class FraudDetactionLightning(L.LightningModule):
         binary_preds = (probs > 0.5).float()
 
         # Log the validation loss to Lightning's progress bar
-        self.log('val_loss', loss, prog_bar=True)
+        self.log("val_loss", loss, prog_bar=True)
 
         # Collect outputs for epoch-level metric calculation
         # Store predictions and targets from this batch
-        output = {
-            'preds': binary_preds,
-            'probs': probs,
-            'targets': batch_y
-        }
+        output = {"preds": binary_preds, "probs": probs, "targets": batch_y}
         self.validation_step_outputs.append(output)
 
         return loss
@@ -132,14 +132,10 @@ class FraudDetactionLightning(L.LightningModule):
         binary_preds = (probs > 0.5).float()
 
         # Log the test loss to Lightning's progress bar
-        self.log('test_loss', loss, prog_bar=True)
+        self.log("test_loss", loss, prog_bar=True)
 
         # Collect outputs for epoch-level metric calculation
-        output = {
-            'preds': binary_preds,
-            'probs': probs,
-            'targets': batch_y
-        }
+        output = {"preds": binary_preds, "probs": probs, "targets": batch_y}
         self.test_step_outputs.append(output)
 
         return loss
@@ -149,9 +145,15 @@ class FraudDetactionLightning(L.LightningModule):
         # Aggregate all batch outputs into complete dataset predictions
 
         # Concatenate all batch predictions and targets into single tensors
-        all_preds = torch.cat([x['preds'] for x in self.validation_step_outputs])
-        all_probs = torch.cat([x['probs'] for x in self.validation_step_outputs])
-        all_targets = torch.cat([x['targets'] for x in self.validation_step_outputs])
+        all_preds = torch.cat(
+            [x["preds"] for x in self.validation_step_outputs]
+        )
+        all_probs = torch.cat(
+            [x["probs"] for x in self.validation_step_outputs]
+        )
+        all_targets = torch.cat(
+            [x["targets"] for x in self.validation_step_outputs]
+        )
 
         # Convert to numpy for sklearn metrics (move to CPU if on GPU)
         preds_np = all_preds.cpu().numpy()
@@ -165,10 +167,10 @@ class FraudDetactionLightning(L.LightningModule):
         roc_auc = roc_auc_score(targets_np, probs_np)
 
         # Log metrics to Lightning (will appear in progress bar and logs)
-        self.log('val_precision', precision, prog_bar=True)
-        self.log('val_recall', recall, prog_bar=True)
-        self.log('val_f1', f1, prog_bar=True)
-        self.log('val_roc_auc', roc_auc, prog_bar=True)
+        self.log("val_precision", precision, prog_bar=True)
+        self.log("val_recall", recall, prog_bar=True)
+        self.log("val_f1", f1, prog_bar=True)
+        self.log("val_roc_auc", roc_auc, prog_bar=True)
 
         # Clear the outputs list for the next epoch
         self.validation_step_outputs.clear()
@@ -178,9 +180,9 @@ class FraudDetactionLightning(L.LightningModule):
         # Aggregate all batch outputs into complete dataset predictions
 
         # Concatenate all batch predictions and targets
-        all_preds = torch.cat([x['preds'] for x in self.test_step_outputs])
-        all_probs = torch.cat([x['probs'] for x in self.test_step_outputs])
-        all_targets = torch.cat([x['targets'] for x in self.test_step_outputs])
+        all_preds = torch.cat([x["preds"] for x in self.test_step_outputs])
+        all_probs = torch.cat([x["probs"] for x in self.test_step_outputs])
+        all_targets = torch.cat([x["targets"] for x in self.test_step_outputs])
 
         # Convert to numpy for sklearn metrics
         preds_np = all_preds.cpu().numpy()
@@ -194,10 +196,10 @@ class FraudDetactionLightning(L.LightningModule):
         roc_auc = roc_auc_score(targets_np, probs_np)
 
         # Log metrics to Lightning
-        self.log('test_precision', precision, prog_bar=True)
-        self.log('test_recall', recall, prog_bar=True)
-        self.log('test_f1', f1, prog_bar=True)
-        self.log('test_roc_auc', roc_auc, prog_bar=True)
+        self.log("test_precision", precision, prog_bar=True)
+        self.log("test_recall", recall, prog_bar=True)
+        self.log("test_f1", f1, prog_bar=True)
+        self.log("test_roc_auc", roc_auc, prog_bar=True)
 
         # Clear the outputs list
         self.test_step_outputs.clear()
