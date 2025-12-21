@@ -19,7 +19,7 @@ class BaseFraudNN(L.LightningModule):
     def __init__(self, pos_weight=None, lr=0.008):
         super().__init__()
         self.pos_weight = pos_weight
-        self.lr = 0.008
+        self.lr = lr
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
@@ -91,7 +91,7 @@ class BaseFraudNN(L.LightningModule):
         probs = torch.sigmoid(predictions)
 
         # Convert probabilities to binary predictions using 0.5 threshold
-        binary_preds = (probs > 0.5).float()
+        binary_preds = (probs > 0.9).float()
 
         # Log the test loss to Lightning's progress bar
         self.log("test_loss", loss, prog_bar=True)

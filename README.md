@@ -15,6 +15,7 @@ This project demonstrates a systematic approach to neural network architecture e
 ## Quick Start
 
 ### 1. Setup Environment
+
 ```bash
 # Activate your virtual environment
 source ~/.venvs/data_stuffs/bin/activate  # or your venv path
@@ -24,6 +25,7 @@ pip install torch lightning scikit-learn pandas joblib matplotlib seaborn
 ```
 
 ### 2. Prepare Data
+
 ```bash
 # Preprocess the raw dataset (one-time setup)
 python src/preprocess.py
@@ -33,6 +35,7 @@ python src/explore.py
 ```
 
 ### 3. Train an Architecture
+
 ```bash
 # Train the baseline architecture for 50 epochs
 python -m scripts.train_architecture --arch baseline --epochs 50
@@ -41,6 +44,7 @@ python -m scripts.train_architecture --arch baseline --epochs 50
 ```
 
 ### 4. Add a New Architecture
+
 See [Adding New Architectures](#adding-new-architectures) below.
 
 ---
@@ -102,6 +106,7 @@ This design means adding a new architecture requires only ~15 lines of code!
 **Architecture**: 30→64→32→16→8→1 (bottleneck design)
 **Hyperparameters**: batch_size=512, lr=0.008, epochs=50, pos_weight≈289
 **Results**:
+
 - F1-Score: 0.79-0.80
 - Precision: 78-82%
 - Recall: 78-79%
@@ -127,6 +132,7 @@ python src/preprocess.py
 ```
 
 **What it does**:
+
 - Loads `data/creditcard.csv`
 - Stratified train/test split (maintains class imbalance ratio)
 - StandardScaler normalization (fitted on training data only to prevent data leakage)
@@ -141,6 +147,7 @@ python src/explore.py
 ```
 
 **What it does**:
+
 - Generates statistical summaries
 - Creates visualizations (correlation heatmaps, distributions by class)
 - Outputs plots to `plots/` directory
@@ -162,6 +169,7 @@ python -m scripts.train_architecture --arch baseline --epochs 100 --batch_size 2
 ```
 
 **What it does**:
+
 - Loads preprocessed data
 - Calculates `pos_weight` from training labels
 - Creates model via factory
@@ -263,6 +271,7 @@ python -m scripts.train_architecture --arch your_arch --epochs 50
 ### Model Architecture Pattern
 
 **Baseline: Bottleneck Design**
+
 - Input: 30 features
 - Hidden layers: 64 → 32 → 16 → 8 neurons (decreasing width)
 - Activation: ReLU after each hidden layer
@@ -283,15 +292,18 @@ python -m scripts.train_architecture --arch your_arch --epochs 50
 ### Critical Implementation Notes
 
 **Data Leakage Prevention**:
+
 - `StandardScaler` is fitted on training data only, then applied to test data
 - This prevents test set statistics from influencing the scaler
 
 **Precision-Recall Tradeoff**:
+
 - The 0.5 decision threshold can be tuned based on business requirements
 - High recall: Minimize missed fraud (accept false alarms)
 - High precision: Minimize customer inconvenience (accept missed fraud)
 
 **Dtype Handling**:
+
 - Always use `torch.tensor([value], dtype=torch.float32)` for scalar tensors
 - Mixing float64 (NumPy/Pandas default) with float32 (PyTorch default) causes training instability
 
@@ -302,10 +314,12 @@ python -m scripts.train_architecture --arch your_arch --epochs 50
 See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 
 **Completed**:
+
 - ✅ Foundation infrastructure (base class, factory, CLI)
 - ✅ Baseline architecture (F1≈0.80)
 
 **Planned Architectures**:
+
 1. **Wide Network**: 30→128→128→64→32→1 (more capacity)
 2. **Deep Network**: 30→64→64→32→32→16→16→8→1 (deeper hierarchies)
 3. **ResNet-Style**: Skip connections for better gradient flow
@@ -313,6 +327,7 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 5. **LayerNorm**: Alternative normalization for imbalanced data
 
 **Success Criteria**:
+
 - Each architecture trains without errors
 - At least one improves upon baseline F1≈0.80
 - Clear understanding of architectural tradeoffs
@@ -322,21 +337,25 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 ## Learning Insights
 
 ### Imbalanced Classification
+
 - Standard accuracy metric is misleading (99.8% by always predicting "not fraud")
 - Always use F1, Precision/Recall, ROC-AUC for imbalanced problems
 - Weighted loss functions are crucial
 
 ### Template Method Pattern
+
 - Separates "what to do" (training logic in base) from "how to compute" (architecture in children)
 - Enables rapid experimentation without code duplication
 - New architectures are ~15 lines instead of 200+
 
 ### PyTorch Lightning
+
 - Abstracts away boilerplate (training loops, device management, logging)
 - Provides consistent interface for experiments
 - Built-in checkpointing and metric tracking
 
 ### Data Preprocessing
+
 - Fit scalers/transformers on training data only
 - Validate that preprocessing doesn't leak information from test set
 - Stratified splits maintain class balance across splits
@@ -346,6 +365,7 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 ## Dependencies
 
 Core libraries:
+
 - `torch` - Neural network framework
 - `lightning` - PyTorch Lightning for training
 - `scikit-learn` - Preprocessing, metrics, train/test split
@@ -355,6 +375,7 @@ Core libraries:
 - `numpy` - Numerical operations
 
 Install all:
+
 ```bash
 pip install torch lightning scikit-learn pandas joblib matplotlib seaborn numpy
 ```
@@ -368,6 +389,14 @@ pip install torch lightning scikit-learn pandas joblib matplotlib seaborn numpy
 **Baseline Performance**: F1≈0.80 verified ✓
 
 For detailed experimentation tracking, see `ARCHITECTURE_PLAN.md`.
+
+## Findings
+
+| Architecture | Layers | Test Loss | F1 Score | ROC-AUC | Verdict                       |
+| ------------ | ------ | --------- | -------- | ------- | ----------------------------- |
+| Baseline     | 5      | 0.28      | 0.37     | 0.934   | ✅ Works                      |
+| Deep         | 11     | 0.95      | 0.00     | 0.500   | ❌ Dead (vanisHIng gradients) |
+| Wide         | 5      |
 
 ---
 

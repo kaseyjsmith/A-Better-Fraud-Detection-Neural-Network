@@ -54,7 +54,7 @@ def training_setup(**config):
         f"Class imbalance - Total: {total}, Fraud: {fraud_count}, pos_weight: {pos_weight:.4f}"
     )
 
-    model = create_architecture(config["arch"], pos_weight=pos_weight)
+    model = create_architecture(config["architecture"], pos_weight=pos_weight)
     print(f"Model created: {type(model).__name__}")
     print(f"Model pos_weight in loss_fn: {model.loss_fn.pos_weight}")
     # Set up the lightning trainer
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         else:
             NUM_WORKERS = 23  # CPU has 23 cores
 
-        config["arch"] = args.arch[0]
+        config["architecture"] = args.arch[0]
         config["epochs"] = epochs
         config["batch_size"] = BATCH_SIZE
         config["num_workers"] = NUM_WORKERS
@@ -144,11 +144,20 @@ if __name__ == "__main__":
         # append the results to the file
         with open(arch_runs, "a") as file:
             file.write(f"{'=' * 80}\n")
+            # Write model info and parameters
             file.write(f"Model: {type(model).__name__}\n")
             file.write(f"Model params:\n")
             file.write(f"    {model.parameters}\n")
+
+            # Write the config used for the training run
+            file.write(f"Training config:\n")
+            for key in config:
+                file.write(f"    {key}: {config[key]}\n")
+
+            # Write when the run happened
             file.write(f"Run datetime: {datetime.now()}\n")
-            # file.write(f"Results: {str(results[0])}\n\n")
+
+            # Write the results
             results_dict = ast.literal_eval(str(results[0]))
             for key in results_dict:
                 file.write(f"    {key}: {results_dict[key]}\n")
