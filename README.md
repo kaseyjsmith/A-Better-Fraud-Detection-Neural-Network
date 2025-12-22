@@ -1,14 +1,20 @@
 # Credit Card Fraud Detection with Neural Networks
 
-This project demonstrates a systematic approach to neural network architecture experimentation for fraud detection. Using the Credit Card fraud dataset, we explore how different network architectures perform on highly imbalanced data (~0.2% fraud) with minimal feature engineering.
+I wanted to make a project that encompassed 3 things:
+
+- An exploration of different neural networks and their tradeoffs
+- Perform this exploration on a dataset that was highly class imbalanced
+- Do this in a production-level project, not just another Jupyter notebook
+
+This project demonstrates a systematic approach to neural network architecture experimentation for fraud detection. Using the Credit Card fraud dataset, I explore how different network architectures perform on highly imbalanced data (~0.2% fraud) with minimal feature engineering.
 
 ## Project Overview
 
-**Goal**: Compare multiple neural network architectures to understand architectural tradeoffs for fraud detection
+**Goal**: Compare multiple neural network architectures and parameter tuning to understand architectural tradeoffs for fraud detection
 
-**Approach**: Incremental experimentation - build one architecture at a time, train it, analyze results, and learn from each iteration
+**Approach**: Incremental experimentation. Build one architecture at a time, train it, analyze results, and learn from each iteration
 
-**Current Baseline**: 30→64→32→16→8→1 architecture achieving F1≈0.80, Precision≈82%, Recall≈78%
+**Current Baseline**: Simple NN with layer 30→64→32→16→8→1 architecture achieving F1≈0.80, Precision≈82%, Recall≈78%
 
 ---
 
@@ -27,20 +33,24 @@ pip install torch lightning scikit-learn pandas joblib matplotlib seaborn
 ### 2. Prepare Data
 
 ```bash
+# (Optional) Run exploratory data analysis
+python src/explore.py
+```
+
+```bash
 # Preprocess the raw dataset (one-time setup)
 python src/preprocess.py
 
-# (Optional) Run exploratory data analysis
-python src/explore.py
 ```
 
 ### 3. Train an Architecture
 
 ```bash
 # Train the baseline architecture for 50 epochs
+# All architectures available in src/models/nn/architecture_factory.py
 python -m scripts.train_architecture --arch baseline --epochs 50
 
-# Results will be logged to lightning_logs/
+# Results will be logged to lightning_logs/ and experiments/archtecture_runs.txt
 ```
 
 ### 4. Add a New Architecture
@@ -99,8 +109,6 @@ The project uses a **Template Method Pattern** to enable rapid architecture expe
 - **Factory pattern**: Centralized architecture creation via string names
 - **CLI trainer**: Unified interface to train any architecture
 
-This design means adding a new architecture requires only ~15 lines of code!
-
 ### Current Baseline Performance
 
 **Architecture**: 30→64→32→16→8→1 (bottleneck design)
@@ -114,11 +122,12 @@ This design means adding a new architecture requires only ~15 lines of code!
 
 ### Class Imbalance Strategy
 
-The dataset is highly imbalanced (~0.2% fraud). We handle this through:
+The dataset is highly imbalanced (~0.2% fraud). I handle this through:
 
 1. **Weighted Loss**: `BCEWithLogitsLoss` with `pos_weight` parameter (makes fraud misclassification 285× more costly)
 2. **Stratified Split**: Maintains class ratio in train/test sets
 3. **Dropout Regularization**: 20% dropout prevents overfitting to majority class
+   a. This could use optimizing. 20% is an educated first guess.
 4. **Appropriate Metrics**: F1, Precision, Recall, ROC-AUC (not accuracy)
 
 ---
@@ -138,7 +147,7 @@ python src/preprocess.py
 - StandardScaler normalization (fitted on training data only to prevent data leakage)
 - Saves: `X_train_scaled.pkl`, `X_test_scaled.pkl`, `y_train.pkl`, `y_test.pkl`, scaler
 
-**Must run before training!**
+**NOTE:** Run this before training.
 
 ### Exploratory Data Analysis
 
@@ -151,6 +160,8 @@ python src/explore.py
 - Generates statistical summaries
 - Creates visualizations (correlation heatmaps, distributions by class)
 - Outputs plots to `plots/` directory
+
+This file was used while I was exploring the dataset. As I wanted to avoid using a Jupyter Notebook as described above, this is split into cells and was run in a REPL.
 
 ### Training an Architecture
 
@@ -185,6 +196,11 @@ tail -5 lightning_logs/version_*/metrics.csv | grep test
 
 # Read checkpoint details
 python scripts/read_checkpoint_metrics.py
+```
+
+```bash
+# Formatted easiest to view
+cat experiements/architecture_runs.txt
 ```
 
 ---
@@ -298,9 +314,10 @@ python -m scripts.train_architecture --arch your_arch --epochs 50
 
 **Precision-Recall Tradeoff**:
 
-- The 0.5 decision threshold can be tuned based on business requirements
-- High recall: Minimize missed fraud (accept false alarms)
-- High precision: Minimize customer inconvenience (accept missed fraud)
+- The 0.9 decision threshold can be tuned based on business requirements
+  - For this dataset, a decision threashold of ~0.9 was found to be suitable
+- I've taken the Product Management approach (as I am a Product Manager professionally) to prioritize precision over recall.
+  - I would rather miss some and not nuissance customers rather than create unnecessary false alarms. In the end, some prediction capability and catching fraud is better than nothing. Whereas false alarms get people's suspicion up and is an unnecessarily scary experience in a false alarm.
 
 **Dtype Handling**:
 
@@ -315,16 +332,16 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 
 **Completed**:
 
-- ✅ Foundation infrastructure (base class, factory, CLI)
-- ✅ Baseline architecture (F1≈0.80)
+- [x] Foundation infrastructure (base class, factory, CLI)
+- [x] Baseline architecture (F1≈0.80)
 
 **Planned Architectures**:
 
-1. **Wide Network**: 30→128→128→64→32→1 (more capacity)
-2. **Deep Network**: 30→64→64→32→32→16→16→8→1 (deeper hierarchies)
-3. **ResNet-Style**: Skip connections for better gradient flow
-4. **BatchNorm**: Normalization for training stability
-5. **LayerNorm**: Alternative normalization for imbalanced data
+1. [x] **Wide Network**: 30→128→128→64→32→1 (more capacity)
+2. [x] **Deep Network**: 30→64→64→32→32→16→16→8→1 (deeper hierarchies)
+3. [x] **ResNet-Style**: Skip connections for better gradient flow
+4. [x] **BatchNorm**: Normalization for training stability
+5. [ ] **LayerNorm**: Alternative normalization for imbalanced data
 
 **Success Criteria**:
 
@@ -338,19 +355,24 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 
 ### Imbalanced Classification
 
-- Standard accuracy metric is misleading (99.8% by always predicting "not fraud")
+- Standard accuracy metric is misleading
+  - A model could predict all as not fraud and be 99.8% accurate
 - Always use F1, Precision/Recall, ROC-AUC for imbalanced problems
+  - Allows for viewing important dimensions of overall "accuracy" and to perform the precision/recall tradeoff
 - Weighted loss functions are crucial
 
 ### Template Method Pattern
 
 - Separates "what to do" (training logic in base) from "how to compute" (architecture in children)
 - Enables rapid experimentation without code duplication
-- New architectures are ~15 lines instead of 200+
+- New architectures are ~15 lines instead of 200+ and avoids unnecessary duplicative code
+  - Practicing good inheritance patterns
 
-### PyTorch Lightning
+### PyTorch Lightning (and manual training pattern)
 
 - Abstracts away boilerplate (training loops, device management, logging)
+  - A manual trainer class is defined in `src/train/trainer.py` as I wanted to ensure I understood what Lightning is doing under the hood
+  - Lightning is an emerging time saver and I wanted to learn the framework
 - Provides consistent interface for experiments
 - Built-in checkpointing and metric tracking
 
@@ -362,46 +384,14 @@ See `ARCHITECTURE_PLAN.md` for the full experimentation plan. Summary:
 
 ---
 
-## Dependencies
-
-Core libraries:
-
-- `torch` - Neural network framework
-- `lightning` - PyTorch Lightning for training
-- `scikit-learn` - Preprocessing, metrics, train/test split
-- `pandas` - Data manipulation
-- `joblib` - Serializing preprocessed data
-- `matplotlib`, `seaborn` - Visualization
-- `numpy` - Numerical operations
-
-Install all:
-
-```bash
-pip install torch lightning scikit-learn pandas joblib matplotlib seaborn numpy
-```
-
----
-
-## Project Status
-
-**Current Phase**: Step 1 Complete (Foundation)
-**Next Steps**: Implement experimental architectures (Wide, Deep, ResNet, etc.)
-**Baseline Performance**: F1≈0.80 verified ✓
-
-For detailed experimentation tracking, see `ARCHITECTURE_PLAN.md`.
-
 ## Findings
 
-| Architecture | Layers | Test Loss | F1 Score | ROC-AUC | Verdict                       |
-| ------------ | ------ | --------- | -------- | ------- | ----------------------------- |
-| Baseline     | 5      | 0.28      | 0.37     | 0.934   | ✅ Works                      |
-| Deep         | 11     | 0.95      | 0.00     | 0.500   | ❌ Dead (vanisHIng gradients) |
-| Wide         | 5      |
-
----
+See `architecture_dashboard.html`
 
 ## Citation
 
 Dataset: [Credit Card Fraud Detection (Kaggle)](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
 
-Original Paper: Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi. Calibrating Probability with Undersampling for Unbalanced Classification. In Symposium on Computational Intelligence and Data Mining (CIDM), IEEE, 2015
+Research for unbalanced classification:
+
+- Original Paper: Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi. Calibrating Probability with Undersampling for Unbalanced Classification. In Symposium on Computational Intelligence and Data Mining (CIDM), IEEE, 2015

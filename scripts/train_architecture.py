@@ -136,7 +136,7 @@ if __name__ == "__main__":
         results = trainer.test(model, test_loader)
 
         # write results to a testing file
-        arch_runs = "experiments/architetcure_runs.txt"
+        arch_runs = "experiments/architecture_runs.txt"
         # create the file if it doesn't exist
         if not os.path.exists(arch_runs):
             file = open(arch_runs, "w")

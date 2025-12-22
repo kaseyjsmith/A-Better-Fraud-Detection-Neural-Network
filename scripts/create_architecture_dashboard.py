@@ -1,7 +1,7 @@
 """
 Create an HTML dashboard comparing neural network architecture performance.
 
-Parses experiments/architetcure_runs.txt and generates visualizations.
+Parses experiments/architecture_runs.txt and generates visualizations.
 """
 
 import re
@@ -18,11 +18,11 @@ except Exception:
 
 def parse_architecture_runs(filepath):
     """Parse the architecture runs file and extract metrics for each run."""
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         content = f.read()
 
     # Split by the separator lines
-    runs = content.split('=' * 80)
+    runs = content.split("=" * 80)
 
     results = []
     for run in runs:
@@ -30,36 +30,38 @@ def parse_architecture_runs(filepath):
             continue
 
         # Extract model name
-        model_match = re.search(r'Model: (\w+)', run)
+        model_match = re.search(r"Model: (\w+)", run)
         if not model_match:
             continue
         model_name = model_match.group(1)
 
         # Extract training config
-        epochs_match = re.search(r'epochs: (\d+)', run)
-        lr_match = re.search(r'learning_rate: ([\d.]+)', run)
+        epochs_match = re.search(r"epochs: (\d+)", run)
+        lr_match = re.search(r"learning_rate: ([\d.]+)", run)
 
         # Extract metrics
-        test_loss = re.search(r'test_loss: ([\d.]+)', run)
-        test_precision = re.search(r'test_precision: ([\d.]+)', run)
-        test_recall = re.search(r'test_recall: ([\d.]+)', run)
-        test_f1 = re.search(r'test_f1: ([\d.]+)', run)
-        test_roc_auc = re.search(r'test_roc_auc: ([\d.]+)', run)
+        test_loss = re.search(r"test_loss: ([\d.]+)", run)
+        test_precision = re.search(r"test_precision: ([\d.]+)", run)
+        test_recall = re.search(r"test_recall: ([\d.]+)", run)
+        test_f1 = re.search(r"test_f1: ([\d.]+)", run)
+        test_roc_auc = re.search(r"test_roc_auc: ([\d.]+)", run)
 
         # Extract datetime
-        datetime_match = re.search(r'Run datetime: ([\d\-: .]+)', run)
+        datetime_match = re.search(r"Run datetime: ([\d\-: .]+)", run)
 
         if all([test_loss, test_precision, test_recall, test_f1, test_roc_auc]):
             result = {
-                'model': model_name,
-                'epochs': int(epochs_match.group(1)) if epochs_match else None,
-                'learning_rate': float(lr_match.group(1)) if lr_match else 0.008,
-                'test_loss': float(test_loss.group(1)),
-                'test_precision': float(test_precision.group(1)),
-                'test_recall': float(test_recall.group(1)),
-                'test_f1': float(test_f1.group(1)),
-                'test_roc_auc': float(test_roc_auc.group(1)),
-                'datetime': datetime_match.group(1) if datetime_match else None,
+                "model": model_name,
+                "epochs": int(epochs_match.group(1)) if epochs_match else None,
+                "learning_rate": float(lr_match.group(1))
+                if lr_match
+                else 0.008,
+                "test_loss": float(test_loss.group(1)),
+                "test_precision": float(test_precision.group(1)),
+                "test_recall": float(test_recall.group(1)),
+                "test_f1": float(test_f1.group(1)),
+                "test_roc_auc": float(test_roc_auc.group(1)),
+                "datetime": datetime_match.group(1) if datetime_match else None,
             }
             results.append(result)
 
@@ -74,54 +76,57 @@ def generate_html_dashboard(results, output_path):
     model_all = {}
 
     for result in results:
-        model = result['model']
+        model = result["model"]
         if model not in model_all:
             model_all[model] = []
         model_all[model].append(result)
 
         # Keep the best F1 score for each model
-        if model not in model_best or result['test_f1'] > model_best[model]['test_f1']:
+        if (
+            model not in model_best
+            or result["test_f1"] > model_best[model]["test_f1"]
+        ):
             model_best[model] = result
 
     # Architecture parameter counts (approximate)
     param_counts = {
-        'BaselineFraudNN': 4_700,
-        'WideFraudNN': 30_900,
-        'DeepFraudNN': 17_600,
-        'ResNetFraudNN': 17_600,
-        'BatchNormFraudNN': 17_600,
+        "BaselineFraudNN": 4_700,
+        "WideFraudNN": 30_900,
+        "DeepFraudNN": 17_600,
+        "ResNetFraudNN": 17_600,
+        "BatchNormFraudNN": 17_600,
     }
 
     # Model display names
     display_names = {
-        'BaselineFraudNN': 'Baseline (5 layers)',
-        'WideFraudNN': 'Wide (5 layers, 128 units)',
-        'DeepFraudNN': 'Deep (11 layers)',
-        'ResNetFraudNN': 'ResNet (11 layers + skip)',
-        'BatchNormFraudNN': 'BatchNorm (11 layers + BN)',
+        "BaselineFraudNN": "Baseline (5 layers)",
+        "WideFraudNN": "Wide (5 layers, 128 units)",
+        "DeepFraudNN": "Deep (11 layers)",
+        "ResNetFraudNN": "ResNet (11 layers + skip)",
+        "BatchNormFraudNN": "BatchNorm (11 layers + BN)",
     }
 
     # Generate Plotly charts data
     models = list(model_best.keys())
     model_labels = [display_names.get(m, m) for m in models]
 
-    f1_scores = [model_best[m]['test_f1'] for m in models]
-    precision_scores = [model_best[m]['test_precision'] for m in models]
-    recall_scores = [model_best[m]['test_recall'] for m in models]
-    roc_auc_scores = [model_best[m]['test_roc_auc'] for m in models]
-    loss_scores = [model_best[m]['test_loss'] for m in models]
+    f1_scores = [model_best[m]["test_f1"] for m in models]
+    precision_scores = [model_best[m]["test_precision"] for m in models]
+    recall_scores = [model_best[m]["test_recall"] for m in models]
+    roc_auc_scores = [model_best[m]["test_roc_auc"] for m in models]
+    loss_scores = [model_best[m]["test_loss"] for m in models]
     params = [param_counts.get(m, 0) for m in models]
 
     # Color coding: green for good, yellow for ok, red for failed
     colors = []
     for m in models:
-        f1 = model_best[m]['test_f1']
+        f1 = model_best[m]["test_f1"]
         if f1 >= 0.75:
-            colors.append('#2ecc71')  # Green - good
+            colors.append("#2ecc71")  # Green - good
         elif f1 >= 0.40:
-            colors.append('#f39c12')  # Orange - ok
+            colors.append("#f39c12")  # Orange - ok
         else:
-            colors.append('#e74c3c')  # Red - failed
+            colors.append("#e74c3c")  # Red - failed
 
     html_template = f"""
 <!DOCTYPE html>
@@ -225,7 +230,9 @@ def generate_html_dashboard(results, output_path):
 <body>
     <div class="container">
         <h1>🧠 Neural Network Architecture Comparison</h1>
-        <p class="subtitle">Fraud Detection Performance Analysis - Generated {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+        <p class="subtitle">Fraud Detection Performance Analysis - Generated {
+        datetime.now().strftime("%Y-%m-%d %H:%M")
+    }</p>
 
         <div class="metrics-grid">
             <div class="metric-card">
@@ -268,7 +275,10 @@ def generate_html_dashboard(results, output_path):
                 </tr>
             </thead>
             <tbody>
-                {''.join([f'''
+                {
+        "".join(
+            [
+                f'''
                 <tr>
                     <td><strong>{display_names.get(m, m)}</strong></td>
                     <td>{param_counts.get(m, 0):,}</td>
@@ -283,18 +293,40 @@ def generate_html_dashboard(results, output_path):
                         {'✅ Excellent' if model_best[m]['test_f1'] >= 0.75 else '⚠️ OK' if model_best[m]['test_f1'] >= 0.40 else '❌ Failed'}
                     </span></td>
                 </tr>
-                ''' for m in models])}
+                '''
+                for m in models
+            ]
+        )
+    }
             </tbody>
         </table>
 
         <div class="insight-box">
             <h3>💡 Key Findings</h3>
             <ul>
-                <li><strong>Baseline</strong> ({param_counts.get('BaselineFraudNN', 0):,} params): Simple 5-layer network, stable training, F1={model_best.get('BaselineFraudNN', {}).get('test_f1', 0):.3f}</li>
-                <li><strong>Deep Network</strong> ({param_counts.get('DeepFraudNN', 0):,} params): Failed due to vanishing gradients (F1={model_best.get('DeepFraudNN', {}).get('test_f1', 0):.3f}, ROC-AUC≈0.5 = random)</li>
-                <li><strong>ResNet</strong> ({param_counts.get('ResNetFraudNN', 0):,} params): Skip connections solved vanishing gradients but training unstable (explodes after epoch 7)</li>
-                <li><strong>Wider Network</strong> ({param_counts.get('WideFraudNN', 0):,} params): 6.5× more parameters, sensitive to learning rate</li>
-                <li><strong>Best Performer</strong>: {max(model_best.items(), key=lambda x: x[1]['test_f1'])[0]} with F1={max(f1_scores):.3f}</li>
+                <li><strong>Baseline</strong> ({
+        param_counts.get(
+            "BaselineFraudNN", 0
+        ):,} params): Simple 5-layer network, stable training, F1={
+        model_best.get("BaselineFraudNN", {}).get("test_f1", 0):.3f}</li>
+                <li><strong>Deep Network</strong> ({
+        param_counts.get(
+            "DeepFraudNN", 0
+        ):,} params): Failed due to vanishing gradients (F1={
+        model_best.get("DeepFraudNN", {}).get(
+            "test_f1", 0
+        ):.3f}, ROC-AUC≈0.5 = random)</li>
+                <li><strong>ResNet</strong> ({
+        param_counts.get(
+            "ResNetFraudNN", 0
+        ):,} params): Skip connections solved vanishing gradients but training unstable (explodes after epoch 7)</li>
+                <li><strong>Wider Network</strong> ({
+        param_counts.get(
+            "WideFraudNN", 0
+        ):,} params): 6.5× more parameters, sensitive to learning rate</li>
+                <li><strong>Best Performer</strong>: {
+        max(model_best.items(), key=lambda x: x[1]["test_f1"])[0]
+    } with F1={max(f1_scores):.3f}</li>
             </ul>
         </div>
     </div>
@@ -308,7 +340,7 @@ def generate_html_dashboard(results, output_path):
             marker: {{
                 color: {json.dumps(colors)},
             }},
-            text: {json.dumps([f'{f:.3f}' for f in f1_scores])},
+            text: {json.dumps([f"{f:.3f}" for f in f1_scores])},
             textposition: 'auto',
         }}];
 
@@ -408,15 +440,17 @@ def generate_html_dashboard(results, output_path):
 </html>
 """
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(html_template)
 
     print(f"✅ Dashboard created: {output_path}")
-    print(f"📊 Analyzed {len(results)} experiments across {len(models)} architectures")
+    print(
+        f"📊 Analyzed {len(results)} experiments across {len(models)} architectures"
+    )
 
 
 if __name__ == "__main__":
-    runs_file = proj_root / "experiments/architetcure_runs.txt"
+    runs_file = proj_root / "experiments/architecture_runs.txt"
     output_file = proj_root / "architecture_dashboard.html"
 
     if not runs_file.exists():
