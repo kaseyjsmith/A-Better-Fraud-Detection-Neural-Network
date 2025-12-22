@@ -61,10 +61,11 @@ See [Adding New Architectures](#adding-new-architectures) below.
 
 ## Project Structure
 
+Rough outline of project. This is not encompansing of all contents.
+
 ```
 fraud_detection/
 ├── data/                              # Dataset and preprocessed files
-│   ├── creditcard.csv                 # Raw dataset (~285K transactions, 30 features)
 │   ├── X_train_scaled.pkl             # Preprocessed training features
 │   ├── X_test_scaled.pkl              # Preprocessed test features
 │   ├── y_train.pkl                    # Training labels
@@ -80,11 +81,11 @@ fraud_detection/
 │       └── architectures/
 │           ├── base.py                # Base class with shared training logic
 │           ├── baseline.py            # Baseline: 30→64→32→16→8→1
-│           ├── wide_network.py        # (Coming) Wide: 30→128→128→64→32→1
-│           ├── deep_network.py        # (Coming) Deep: 8 layers
-│           ├── resnet_fraud.py        # (Coming) ResNet-style with skip connections
-│           ├── batchnorm_network.py   # (Coming) With BatchNorm
-│           └── layernorm_network.py   # (Coming) With LayerNorm
+│           ├── wide.py                # Wide: 30→128→128→64→32→1
+│           ├── deep.py                # Deep: 11 layers
+│           ├── resnet.py              # ResNet-style with skip connections
+│           ├── batchnorm.py           # With BatchNorm
+│           └── layernorm.py           # (Coming) With LayerNorm
 │
 ├── scripts/
 │   ├── train_architecture.py          # CLI trainer for any architecture
@@ -92,8 +93,6 @@ fraud_detection/
 │
 ├── plots/                             # EDA visualizations
 ├── lightning_logs/                    # Training logs and checkpoints
-├── ARCHITECTURE_PLAN.md               # Experimentation roadmap and results
-└── README.md                          # This file
 ```
 
 ---
