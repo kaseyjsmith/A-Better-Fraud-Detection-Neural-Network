@@ -3,6 +3,8 @@ import joblib
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import lightning as L
+from lightning.pytorch.loggers import CSVLogger
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 
 # Setup paths
 try:
@@ -18,9 +20,21 @@ sys.path.insert(0, proj_root)
 from src.models.nn.lightning_fraud import FraudDetactionLightning
 
 # Constants
+ARCHITECTURE = "baseline"  # Options: "baseline", "wide", "deep", "resnet", etc.
 EPOCHS = 50
 BATCH_SIZE = 512  # Increased from 32 - more computation per batch
+LEARNING_RATE = 0.008
 NUM_WORKERS = 8  # Parallel data loading across N CPU cores
+
+
+def generate_run_id(architecture, epochs, lr, batch_size):
+    """
+    Generate a descriptive run ID based on hyperparameters.
+
+    Example: "baseline_e50_lr0.008_b512"
+    """
+    return f"{architecture}_e{epochs}_lr{lr}_b{batch_size}"
+
 
 # Load preprocessed data
 X_train_scaled = joblib.load(proj_root + "/data/X_train_scaled.pkl")
@@ -64,8 +78,20 @@ test_loader = DataLoader(
     pin_memory=True,
 )
 
+# Generate descriptive run ID
+run_id = generate_run_id(ARCHITECTURE, EPOCHS, LEARNING_RATE, BATCH_SIZE)
+print(f"Run ID: {run_id}")
+
 # Create the Lightning model with pos_weight for class imbalance
-model = FraudDetactionLightning(pos_weight=pos_weight)
+model = FraudDetactionLightning(
+    pos_weight=pos_weight, lr=LEARNING_RATE, run_id=run_id
+)
+
+# Create CSVLogger with descriptive name (prevents version_0, version_1, etc.)
+logger = CSVLogger(
+    save_dir=f"{proj_root}/lightning_logs",
+    name=run_id,  # This becomes the folder name
+)
 
 # Create Lightning Trainer
 trainer = L.Trainer(
@@ -73,12 +99,21 @@ trainer = L.Trainer(
     accelerator="auto",  # Automatically uses GPU if available, else CPU
     devices=1,
     log_every_n_steps=10,
+    logger=logger,  # Use custom logger
+    callbacks=[
+        EarlyStopping(
+            monitor="val_loss",
+            mode="min",
+            patience=10,  # Wait 10 epochs before stopping
+            verbose=True,  # Print when early stopping is triggered
+        )
+    ],
 )
 
 # Train the model
 print(f"\nStarting training for {EPOCHS} epochs...")
-trainer.fit(model, train_loader)
+trainer.fit(model, train_loader, test_loader)  # Pass test_loader as validation
 
-# Test the model
+# Test the model (this will use the best checkpoint if early stopping triggered)
 print("\nRunning final test evaluation...")
 results = trainer.test(model, test_loader)

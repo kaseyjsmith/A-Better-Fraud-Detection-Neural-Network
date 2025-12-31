@@ -29,6 +29,8 @@ class FraudDetactionLightning(L.LightningModule):
         out=1,
         dropout_rate=0.2,
         pos_weight=None,
+        lr=0.008,
+        run_id=None,
     ):
         super().__init__()
         self.input = nn.Linear(input, h1)
@@ -42,6 +44,7 @@ class FraudDetactionLightning(L.LightningModule):
         self.dropout = nn.Dropout(self.dropout_rate)
 
         self.pos_weight = pos_weight
+        self.lr = lr
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
@@ -51,7 +54,8 @@ class FraudDetactionLightning(L.LightningModule):
         else:
             self.loss_fn = BCEWithLogitsLoss()
 
-        self.run_id = uuid4()
+        # Use custom run_id if provided, otherwise generate UUID
+        self.run_id = run_id if run_id is not None else str(uuid4())
 
         # Lists to collect outputs across batches for epoch-level metrics
         self.validation_step_outputs = []
@@ -76,7 +80,7 @@ class FraudDetactionLightning(L.LightningModule):
         # Learning rate scaled for batch size
         # Base lr=0.001 for batch_size=32, scale linearly: 512/32 = 16x → lr=0.016
         # Using conservative 0.008 (half of linear scaling) to avoid instability
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.008)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, batch, batch_idx):

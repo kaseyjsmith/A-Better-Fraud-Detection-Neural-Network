@@ -39,7 +39,7 @@ python src/explore.py
 
 ```bash
 # Preprocess the raw dataset (one-time setup)
-python src/preprocess.py
+python src/preprocess/preprocess.py
 
 ```
 

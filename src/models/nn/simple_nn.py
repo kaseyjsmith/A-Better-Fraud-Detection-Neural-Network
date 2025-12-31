@@ -10,7 +10,7 @@ from uuid import uuid4
 
 
 class FraudDetectionNN(Module):
-    def __init__(self, input=30, h1=64, h2=32, h3=16, h4=8, out=1, dropout_rate=0.2):
+    def __init__(self, input=30, h1=64, h2=32, h3=16, h4=8, out=1, dropout_rate=0.2, run_id=None):
         super().__init__()
         self.input = Linear(input, h1)
         self.h1 = Linear(h1, h2)
@@ -22,7 +22,8 @@ class FraudDetectionNN(Module):
         self.dropout_rate = dropout_rate
         self.dropout = Dropout(self.dropout_rate)
 
-        self.run_id = uuid4()
+        # Use custom run_id if provided, otherwise generate UUID
+        self.run_id = run_id if run_id is not None else str(uuid4())
 
     def forward(self, x):
         x = F.relu(self.input(x))

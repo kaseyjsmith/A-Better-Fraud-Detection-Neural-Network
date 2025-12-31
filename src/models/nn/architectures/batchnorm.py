@@ -32,8 +32,10 @@ class BatchNormFraudNN(BaseFraudNN):
         out=1,
         dropout_rate=0.2,
         pos_weight=None,
+        lr=0.008,
+        run_id=None,
     ):
-        super().__init__(pos_weight)
+        super().__init__(pos_weight=pos_weight, lr=lr, run_id=run_id)
 
         # Layers
         self.input = Linear(input, h1)
