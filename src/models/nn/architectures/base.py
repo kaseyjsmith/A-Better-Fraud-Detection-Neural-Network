@@ -16,10 +16,11 @@ from sklearn.metrics import (
 
 
 class BaseFraudNN(L.LightningModule):
-    def __init__(self, pos_weight=None, lr=0.008):
+    def __init__(self, pos_weight=None, lr=0.008, run_id=None, threshold=0.9):
         super().__init__()
         self.pos_weight = pos_weight
         self.lr = lr
+        self.threshold = threshold
 
         # Set up loss function with class weighting for imbalanced data
         if pos_weight is not None:
@@ -29,7 +30,8 @@ class BaseFraudNN(L.LightningModule):
         else:
             self.loss_fn = BCEWithLogitsLoss()
 
-        self.run_id = uuid4()
+        # Use custom run_id if provided, otherwise generate UUID
+        self.run_id = run_id if run_id is not None else str(uuid4())
 
         self.validation_step_outputs = []
         self.test_step_outputs = []
@@ -64,8 +66,8 @@ class BaseFraudNN(L.LightningModule):
         # BCEWithLogitsLoss expects logits, but metrics need probabilities
         probs = torch.sigmoid(predictions)
 
-        # Convert probabilities to binary predictions using 0.5 threshold
-        binary_preds = (probs > 0.5).float()
+        # Convert probabilities to binary predictions using the object's threshold
+        binary_preds = (probs > self.threshold).float()
 
         # Log the validation loss to Lightning's progress bar
         self.log("val_loss", loss, prog_bar=True)
@@ -90,8 +92,8 @@ class BaseFraudNN(L.LightningModule):
         # Convert logits to probabilities using sigmoid activation
         probs = torch.sigmoid(predictions)
 
-        # Convert probabilities to binary predictions using 0.5 threshold
-        binary_preds = (probs > 0.9).float()
+        # Convert probabilities to binary predictions using the object's threshold
+        binary_preds = (probs > self.threshold).float()
 
         # Log the test loss to Lightning's progress bar
         self.log("test_loss", loss, prog_bar=True)

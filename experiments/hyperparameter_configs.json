@@ -1,0 +1,46 @@
+{
+  "training_pos_weight": 258.0,
+  "proven_configs": {
+    "baseline": {
+      "arch": "baseline",
+      "epochs": 50,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "notes": "Simple 5-layer network, stable, F1=0.781"
+    },
+    "wide": {
+      "arch": "wide",
+      "epochs": 50,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "notes": "6.5x more params than baseline, MUST use lr=0.001 (lr=0.008 causes instability), F1=0.775"
+    },
+    "deep": {
+      "arch": "deep",
+      "epochs": 5,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "notes": "11 layers, trained for only 5 epochs, F1=0.800 (best performer)"
+    },
+    "resnet": {
+      "arch": "resnet",
+      "epochs": 5,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "notes": "Skip connections, unstable after epoch 7, failed with F1=0.216"
+    },
+    "batchnorm": {
+      "arch": "batchnorm",
+      "epochs": 50,
+      "learning_rate": 0.001,
+      "batch_size": 512,
+      "notes": "BatchNorm regularization, F1=0.705"
+    }
+  },
+  "learning_rate_guide": {
+    "baseline_4700_params": 0.001,
+    "wide_30900_params": 0.001,
+    "deep_17600_params": 0.001,
+    "rule": "Wider networks need SMALLER learning rates, not larger. lr=0.001 is proven stable across all architectures."
+  }
+}

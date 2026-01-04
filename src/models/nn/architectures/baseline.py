@@ -18,8 +18,10 @@ class BaselineFraudNN(BaseFraudNN):
         out=1,
         dropout_rate=0.2,
         pos_weight=None,
+        lr=0.008,
+        run_id=None,
     ):
-        super().__init__(pos_weight)
+        super().__init__(pos_weight=pos_weight, lr=lr, run_id=run_id)
         self.input = Linear(input, h1)
         self.h1 = Linear(h1, h2)
         self.h2 = Linear(h2, h3)

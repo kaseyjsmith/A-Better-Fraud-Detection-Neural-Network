@@ -1,0 +1,2 @@
+epoch,step,test_f1,test_loss,test_precision,test_recall,test_roc_auc
+50,20900,0.0,18.550048828125,0.0,0.0,0.8916021585464478

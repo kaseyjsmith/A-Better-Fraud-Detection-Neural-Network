@@ -100,7 +100,7 @@
 <body>
     <div class="container">
         <h1>🧠 Neural Network Architecture Comparison</h1>
-        <p class="subtitle">Fraud Detection Performance Analysis - Generated 2025-12-21 15:02</p>
+        <p class="subtitle">Fraud Detection Performance Analysis - Generated 2025-12-31 13:46</p>
 
         <div class="metrics-grid">
             <div class="metric-card">
@@ -113,11 +113,11 @@
             </div>
             <div class="metric-card">
                 <h3>Best F1 Score</h3>
-                <div class="value">0.800</div>
+                <div class="value">0.815</div>
             </div>
             <div class="metric-card">
                 <h3>Best ROC-AUC</h3>
-                <div class="value">0.970</div>
+                <div class="value">0.964</div>
             </div>
         </div>
 
@@ -149,13 +149,13 @@
                     <td>4,700</td>
                     <td>50</td>
                     <td>0.001</td>
-                    <td>0.781</td>
-                    <td>0.827</td>
-                    <td>0.740</td>
-                    <td>0.874</td>
-                    <td>0.402</td>
-                    <td><span class="status-badge status-excellent">
-                        ✅ Excellent
+                    <td>0.744</td>
+                    <td>0.692</td>
+                    <td>0.805</td>
+                    <td>0.961</td>
+                    <td>0.787</td>
+                    <td><span class="status-badge status-ok">
+                        ⚠️ OK
                     </span></td>
                 </tr>
                 
@@ -164,11 +164,11 @@
                     <td>30,900</td>
                     <td>50</td>
                     <td>0.001</td>
-                    <td>0.775</td>
-                    <td>0.869</td>
-                    <td>0.699</td>
-                    <td>0.850</td>
-                    <td>0.453</td>
+                    <td>0.763</td>
+                    <td>0.731</td>
+                    <td>0.797</td>
+                    <td>0.956</td>
+                    <td>0.897</td>
                     <td><span class="status-badge status-excellent">
                         ✅ Excellent
                     </span></td>
@@ -179,11 +179,11 @@
                     <td>17,600</td>
                     <td>5</td>
                     <td>0.001</td>
-                    <td>0.800</td>
-                    <td>0.821</td>
-                    <td>0.780</td>
-                    <td>0.894</td>
-                    <td>0.362</td>
+                    <td>0.815</td>
+                    <td>0.825</td>
+                    <td>0.805</td>
+                    <td>0.963</td>
+                    <td>0.313</td>
                     <td><span class="status-badge status-excellent">
                         ✅ Excellent
                     </span></td>
@@ -194,13 +194,13 @@
                     <td>17,600</td>
                     <td>5</td>
                     <td>0.001</td>
-                    <td>0.216</td>
-                    <td>0.123</td>
-                    <td>0.894</td>
-                    <td>0.970</td>
-                    <td>0.302</td>
-                    <td><span class="status-badge status-failed">
-                        ❌ Failed
+                    <td>0.728</td>
+                    <td>0.644</td>
+                    <td>0.837</td>
+                    <td>0.961</td>
+                    <td>0.366</td>
+                    <td><span class="status-badge status-ok">
+                        ⚠️ OK
                     </span></td>
                 </tr>
                 
@@ -209,11 +209,11 @@
                     <td>17,600</td>
                     <td>50</td>
                     <td>0.001</td>
-                    <td>0.705</td>
-                    <td>0.600</td>
-                    <td>0.854</td>
-                    <td>0.954</td>
-                    <td>0.325</td>
+                    <td>0.709</td>
+                    <td>0.623</td>
+                    <td>0.821</td>
+                    <td>0.964</td>
+                    <td>0.236</td>
                     <td><span class="status-badge status-ok">
                         ⚠️ OK
                     </span></td>
@@ -225,11 +225,11 @@
         <div class="insight-box">
             <h3>💡 Key Findings</h3>
             <ul>
-                <li><strong>Baseline</strong> (4,700 params): Simple 5-layer network, stable training, F1=0.781</li>
-                <li><strong>Deep Network</strong> (17,600 params): Failed due to vanishing gradients (F1=0.800, ROC-AUC≈0.5 = random)</li>
+                <li><strong>Baseline</strong> (4,700 params): Simple 5-layer network, stable training, F1=0.744</li>
+                <li><strong>Deep Network</strong> (17,600 params): Failed due to vanishing gradients (F1=0.815, ROC-AUC≈0.5 = random)</li>
                 <li><strong>ResNet</strong> (17,600 params): Skip connections solved vanishing gradients but training unstable (explodes after epoch 7)</li>
                 <li><strong>Wider Network</strong> (30,900 params): 6.5× more parameters, sensitive to learning rate</li>
-                <li><strong>Best Performer</strong>: DeepFraudNN with F1=0.800</li>
+                <li><strong>Best Performer</strong>: DeepFraudNN with F1=0.815</li>
             </ul>
         </div>
     </div>
@@ -238,12 +238,12 @@
         // F1 Score Comparison
         var f1Data = [{
             x: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
-            y: [0.7811158895492554, 0.7747747898101807, 0.800000011920929, 0.21589793264865875, 0.7046979665756226],
+            y: [0.7443609237670898, 0.7626459002494812, 0.8148148059844971, 0.7279151678085327, 0.7087719440460205],
             type: 'bar',
             marker: {
-                color: ["#2ecc71", "#2ecc71", "#2ecc71", "#e74c3c", "#f39c12"],
+                color: ["#f39c12", "#2ecc71", "#2ecc71", "#f39c12", "#f39c12"],
             },
-            text: ["0.781", "0.775", "0.800", "0.216", "0.705"],
+            text: ["0.744", "0.763", "0.815", "0.728", "0.709"],
             textposition: 'auto',
         }];
 
@@ -260,19 +260,19 @@
         var metricsData = [
             {
                 x: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
-                y: [0.8272727131843567, 0.868686854839325, 0.8205128312110901, 0.1227678582072258, 0.6000000238418579],
+                y: [0.692307710647583, 0.7313432693481445, 0.824999988079071, 0.643750011920929, 0.6234567761421204],
                 name: 'Precision',
                 type: 'bar',
             },
             {
                 x: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
-                y: [0.7398374080657959, 0.6991869807243347, 0.7804877758026123, 0.8943089246749878, 0.8536585569381714],
+                y: [0.8048780560493469, 0.7967479825019836, 0.8048780560493469, 0.8373983502388, 0.8211382031440735],
                 name: 'Recall',
                 type: 'bar',
             },
             {
                 x: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
-                y: [0.8738898038864136, 0.8495020270347595, 0.8941887021064758, 0.9701048135757446, 0.9543120265007019],
+                y: [0.9607598185539246, 0.9559590816497803, 0.9626957774162292, 0.961337685585022, 0.9638063907623291],
                 name: 'ROC-AUC',
                 type: 'bar',
             }
@@ -291,14 +291,14 @@
         // Parameters vs Performance
         var paramsData = [{
             x: [4700, 30900, 17600, 17600, 17600],
-            y: [0.7811158895492554, 0.7747747898101807, 0.800000011920929, 0.21589793264865875, 0.7046979665756226],
+            y: [0.7443609237670898, 0.7626459002494812, 0.8148148059844971, 0.7279151678085327, 0.7087719440460205],
             mode: 'markers+text',
             type: 'scatter',
             text: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
             textposition: 'top center',
             marker: {
                 size: 15,
-                color: ["#2ecc71", "#2ecc71", "#2ecc71", "#e74c3c", "#f39c12"],
+                color: ["#f39c12", "#2ecc71", "#2ecc71", "#f39c12", "#f39c12"],
             },
         }];
 
@@ -313,15 +313,15 @@
 
         // Precision-Recall Tradeoff
         var prData = [{
-            x: [0.7398374080657959, 0.6991869807243347, 0.7804877758026123, 0.8943089246749878, 0.8536585569381714],
-            y: [0.8272727131843567, 0.868686854839325, 0.8205128312110901, 0.1227678582072258, 0.6000000238418579],
+            x: [0.8048780560493469, 0.7967479825019836, 0.8048780560493469, 0.8373983502388, 0.8211382031440735],
+            y: [0.692307710647583, 0.7313432693481445, 0.824999988079071, 0.643750011920929, 0.6234567761421204],
             mode: 'markers+text',
             type: 'scatter',
             text: ["Baseline (5 layers)", "Wide (5 layers, 128 units)", "Deep (11 layers)", "ResNet (11 layers + skip)", "BatchNorm (11 layers + BN)"],
             textposition: 'top center',
             marker: {
                 size: 15,
-                color: ["#2ecc71", "#2ecc71", "#2ecc71", "#e74c3c", "#f39c12"],
+                color: ["#f39c12", "#2ecc71", "#2ecc71", "#f39c12", "#f39c12"],
             },
         }];
 

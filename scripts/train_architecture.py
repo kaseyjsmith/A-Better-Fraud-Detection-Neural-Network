@@ -1,4 +1,6 @@
 import lightning as L
+from lightning.pytorch.loggers import CSVLogger
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -24,6 +26,15 @@ from src.models.nn.architecture_factory import (
     create_architecture,
     list_architectures,
 )
+
+
+def generate_run_id(architecture, epochs, lr, batch_size):
+    """
+    Generate a descriptive run ID based on hyperparameters.
+
+    Example: "wide_e5_lr0.005_b512"
+    """
+    return f"{architecture}_e{epochs}_lr{lr}_b{batch_size}"
 
 
 def training_setup(**config):
@@ -54,7 +65,17 @@ def training_setup(**config):
         f"Class imbalance - Total: {total}, Fraud: {fraud_count}, pos_weight: {pos_weight:.4f}"
     )
 
-    model = create_architecture(config["architecture"], pos_weight=pos_weight)
+    # Generate descriptive run ID
+    lr = config.get("learning_rate", 0.008)  # Default to 0.008 if not specified
+    run_id = generate_run_id(
+        config["architecture"], config["epochs"], lr, config["batch_size"]
+    )
+    print(f"Run ID: {run_id}")
+
+    # Create model with run_id and learning_rate
+    model = create_architecture(
+        config["architecture"], pos_weight=pos_weight, lr=lr, run_id=run_id
+    )
     print(f"Model created: {type(model).__name__}")
     print(f"Model pos_weight in loss_fn: {model.loss_fn.pos_weight}")
     # Set up the lightning trainer
@@ -74,14 +95,34 @@ def training_setup(**config):
         persistent_workers=True,
         pin_memory=True,
     )
+    # Create CSVLogger with descriptive name (prevents version_0, version_1, etc.)
+    logger = CSVLogger(
+        save_dir=f"{proj_root}/lightning_logs",
+        name=run_id,  # This becomes the folder name
+    )
+
     trainer = L.Trainer(
         max_epochs=config["epochs"],
         accelerator="auto",  # Automatically uses GPU if available, else CPU
         devices=1,
         log_every_n_steps=10,
+        logger=logger,  # Use custom logger
+        callbacks=[
+            EarlyStopping(
+                monitor="val_f1",
+                mode="min",
+                patience=10,  # Wait 10 epochs before stopping
+                verbose=True,  # Print when early stopping is triggered
+            )
+        ],
     )
 
     return model, trainer, train_loader, test_loader
+
+
+def check_best_model(architecture):
+    #
+    pass
 
 
 if __name__ == "__main__":
@@ -127,9 +168,9 @@ if __name__ == "__main__":
         model, trainer, train_loader, test_loader = training_setup(**config)
 
         # Fit/train the model
-        # TODO: setup a timer to train the model and output in arch_runs file
-        # TODO: record average iterations per second
-        trainer.fit(model, train_loader)
+        trainer.fit(
+            model, train_loader, test_loader
+        )  # Pass test_loader as validation
 
         # Test the model
         print("\nRunning final test evaluation...")

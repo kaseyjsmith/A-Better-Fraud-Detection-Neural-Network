@@ -18,7 +18,7 @@ This project demonstrates a systematic approach to neural network architecture e
 
 ---
 
-## Quick Start
+## Quick Start (Training)
 
 ### 1. Setup Environment
 
@@ -27,7 +27,7 @@ This project demonstrates a systematic approach to neural network architecture e
 source ~/.venvs/data_stuffs/bin/activate  # or your venv path
 
 # Install dependencies
-pip install torch lightning scikit-learn pandas joblib matplotlib seaborn
+pip install requirements.txt
 ```
 
 ### 2. Prepare Data
@@ -39,7 +39,7 @@ python src/explore.py
 
 ```bash
 # Preprocess the raw dataset (one-time setup)
-python src/preprocess.py
+python src/preprocess/preprocess.py
 
 ```
 
@@ -59,41 +59,50 @@ See [Adding New Architectures](#adding-new-architectures) below.
 
 ---
 
+## Quickstart (Server)
+
+### 1. Setup Environment
+
+```bash
+# Activate your virtual environment
+source ~/.venvs/data_stuffs/bin/activate  # or your venv path
+
+# Install dependencies
+pip install requirements.txt
+```
+
+### 2. Start the server
+
+```bash
+fastapi run src/api/main.py
+```
+
+Since I'm using FastAPI, we get Swagger-backed documentation out of the box. Once the server has started, you can visit `localhost:8000/docs` for documentation.
+
+### 3. Test the predict endpoint
+
+#### Option 1
+
+There is a quick script at `tests/test_api/test_service/test_prediction.py` that will grab a random row from the scaled training data, inverse scale it, and then use it to call `/predict`.
+
+#### Option 2
+
+If you have data from the original dataset [cited below](#citation), you can use this as input data. It's easiset to test at `localhost:8000/docs#/default/predict_predict_post`.
+
+---
+
 ## Project Structure
 
-Rough outline of project. This is not encompansing of all contents.
+- `src`:
+  - `api`: Contains `routes`, `schemas`, and `service` to handle endpoints, data schemas, and services respectively
+  - `models`:
+    - `architectures`: Includes base class (inherets `LightningModule`) for the rest of the archetectures to build on as well as 5 architectures used in this project.
+    - `architecture_factory.py`: An architecture factory for easy achitecture instantiation. This is used in `scripts/train_architecture.py` and is not called directly from the command line.
+    - `scalers`: Contains the pickle file for the scaler that was used for the training data. This is the same scaler used to scale the data in the `/predict` endpoint.
+  - `preprocess/preprocess.py`: Script used for preprocessing data (scaling) and saving it. Used during exploration.
+  - `train`: Different manual implementations of training. Largely not used after creating the architecture factory and training script noted above. Leaving here for demonstration purposes.
 
-```
-fraud_detection/
-├── data/                              # Dataset and preprocessed files
-│   ├── X_train_scaled.pkl             # Preprocessed training features
-│   ├── X_test_scaled.pkl              # Preprocessed test features
-│   ├── y_train.pkl                    # Training labels
-│   └── y_test.pkl                     # Test labels
-│
-├── src/
-│   ├── explore.py                     # Exploratory data analysis
-│   ├── preprocess.py                  # Data loading, scaling, train/test split
-│   │
-│   └── models/nn/
-│       ├── architecture_factory.py    # Factory for creating architectures
-│       │
-│       └── architectures/
-│           ├── base.py                # Base class with shared training logic
-│           ├── baseline.py            # Baseline: 30→64→32→16→8→1
-│           ├── wide.py                # Wide: 30→128→128→64→32→1
-│           ├── deep.py                # Deep: 11 layers
-│           ├── resnet.py              # ResNet-style with skip connections
-│           ├── batchnorm.py           # With BatchNorm
-│           └── layernorm.py           # (Coming) With LayerNorm
-│
-├── scripts/
-│   ├── train_architecture.py          # CLI trainer for any architecture
-│   └── read_checkpoint_metrics.py     # Utility to read Lightning checkpoints
-│
-├── plots/                             # EDA visualizations
-├── lightning_logs/                    # Training logs and checkpoints
-```
+- `tests`
 
 ---
 

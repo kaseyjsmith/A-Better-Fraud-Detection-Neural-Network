@@ -28,7 +28,7 @@ import sys
 
 sys.path.insert(0, proj_root)
 from src.models.nn.simple_nn import FraudDetectionNN
-from src.record import Recorder
+from src.record.record import Recorder
 ###
 
 ###
