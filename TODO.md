@@ -5,4 +5,5 @@
   - [x] Create service layer
 
 - [ ] Change the data loaders to include a validation set. Right now just using train/test
-- [ ] Create a requirements.txt file
+- [ ] ~Create a requirements.txt file~ Makefile et. al
+
